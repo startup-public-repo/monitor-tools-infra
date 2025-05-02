@@ -68,8 +68,5 @@ Before submitting this issue, ensure the following:
 - [x] Logs or screenshots are included for troubleshooting (if applicable).
 - [x] The issue title is descriptive and concise.
 
----
-
-### Thank you for your contribution! 🎯
 
 
