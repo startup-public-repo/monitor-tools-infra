@@ -1,5 +1,3 @@
-
-
 ---
 name: "Monitoring Tools Infrastructure Setup"
 about: "Report or request setup of monitoring tools infrastructure in AWS."
