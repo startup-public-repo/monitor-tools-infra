@@ -1,12 +1,12 @@
 
 
-
+---
 name: "Monitoring Tools Infrastructure Setup"
 about: "Report or request setup of monitoring tools infrastructure in AWS."
 title: "[Monitoring] Infrastructure Setup for Prometheus, Grafana, and ELK Stack"
 labels: ["Monitoring", "DevOps", "AWS", "Terraform", "Ansible"]
 assignees: [manupanand]
-
+---
 
 ## Description
 
