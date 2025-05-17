@@ -1,0 +1,104 @@
+
+- name: Setting prompt name
+  ansible.builtin.lineinfile:
+     path: "/home/ec2-user/.bashrc"
+     line: 'export PS1="\[\e[1;31m\]\u\[\e[0m\]@\[\e[1;34m\]{{ role_name }}\[\e[0m\] \w \$ "'
+     create: true
+     mode: '0644'
+
+- name: Installing firewalld
+  ansible.builtin.dnf: 
+    name: firewalld 
+    state: latest
+  
+
+- name: Enable  firewalld
+  ansible.builtin.systemd_service: 
+   name:  firewalld
+   state: restarted
+   enabled: true
+
+
+- name: Enabling ports with firewalld
+  ansible.builtin.shell: | 
+     firewall-cmd --zone=public --add-port=22/tcp --permanent  && firewall-cmd --reload
+     firewall-cmd --zone=public --add-port=9200/tcp --permanent  && firewall-cmd --reload
+     firewall-cmd --zone=public --add-port=80/tcp --permanent  && firewall-cmd --reload
+     firewall-cmd --zone=public --add-port=443/tcp --permanent  && firewall-cmd --reload
+     firewall-cmd --zone=public --add-port=5601/tcp --permanent  && firewall-cmd --reload
+     firewall-cmd --zone=public --add-port=9600/tcp --permanent  && firewall-cmd --reload
+     firewall-cmd --zone=public --add-port=5044/tcp --permanent  && firewall-cmd --reload
+     firewall-cmd --zone=public --add-port=5000/tcp --permanent  && firewall-cmd --reload
+     firewall-cmd --zone=public --add-port=9300/tcp --permanent  && firewall-cmd --reload
+
+  args:
+    executable: /bin/bash
+
+- name: Copy elastic repo
+  ansible.builtin.copy: 
+    src: elastic.repo 
+    dest: /etc/yum.repos.d/elastic.repo
+
+- name: Install ELK tools
+  ansible.builtin.dnf:
+    name: 
+      - elasticsearch
+      - kibana
+      - nginx
+      - logstash
+    state: latest
+# for kubana UI -nginx 
+- name: Copy nginx config
+  ansible.builtin.copy:
+   src: nginx.conf
+   dest: /etc/nginx/nginx.conf
+
+- name: Enablling network connection SElinux
+  ansible.builtin.shell: |
+     setsebool -P httpd_can_network_connect 1
+
+
+
+
+- name: Start ELK tools
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    state: restarted
+    enabled: true
+  loop: 
+    - elasticsearch
+    - kibana
+    - nginx 
+    - logstash
+
+
+# do manual copy logstash conf 
+
+
+# instead copy to folder- edit file after doinf step 1-3
+
+# - name: Copy logstash conf
+#   ansible.builtin.template: 
+#     src: logstash.conf 
+#     dest: /etc/logstash/conf.d/logstash.conf
+
+# restart logstash
+
+# manual steps to do
+
+#step1
+#get an enrollment token for kibana to connec to elastic search
+#/usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana
+#step 2
+# verification code kibana
+#/usr/share/kibana/bin/kibana-verification-code
+
+#step 3
+# reset password | admin  -user elastic
+#/usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic # keep in vault
+
+# beats is log shipper - unstructure |structure -logstash
+# logstash take information from beats and transfer it to elastic search
+
+# on target to send log to elk server
+#

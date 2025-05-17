@@ -1,0 +1,5 @@
+- name: configure dependencies
+  hosts: all
+  become: true 
+  roles:
+    - "{{ role_name }}"

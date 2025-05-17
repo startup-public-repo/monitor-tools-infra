@@ -1,0 +1,34 @@
+name: Prometheus provisioning pipeline 
+on: 
+  workflow_dispatch:
+
+jobs: 
+  DEV: 
+    runs-on: rhel_arm   
+    steps:
+      - name: Import secrets hashicorp 
+        uses: hashicorp/vault-action@v2.4.0
+        with: 
+          url: ${{secrets.VAULT_SERVER}}
+          token: ${{secrets.VAULT_TOKEN}}
+          tlsSkipVerify: true 
+          secrets: | 
+            tools/data/aws aws_user | AWS_USER;   
+            tools/data/aws aws_password |AWS_PASSWORD;
+      - uses: actions/checkout@v4
+      - name: run terraform 
+        run: |
+          ls -la
+         
+          cd prometheus;
+          terraform init -backend-config=env-dev/state.tfvars ; terraform plan -var-file=env-dev/main.tfvars;terraform apply -var-file=env-dev/main.tfvars -auto-approve
+        env:
+            TF_VAR_aws_user: ${{env.AWS_USER}}
+            TF_VAR_aws_password: ${{env.AWS_PASSWORD}}
+
+
+     
+           
+          
+           
+     

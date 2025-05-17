@@ -1,0 +1,27 @@
+name: Prometheus destroy pipeline
+on: 
+  workflow_dispatch:
+jobs:
+  DEV: 
+    runs-on: rhel_arm 
+    environment:
+    steps:
+      - name: Import secrets hashicorp 
+        uses: hashicorp/vault-action@v2.4.0
+        with: 
+          url: ${{secrets.VAULT_SERVER}}
+          token: ${{secrets.VAULT_TOKEN}}
+          tlsSkipVerify: true  
+          secrets: | 
+            tools/data/aws aws_user | AWS_USER;   
+            tools/data/aws aws_password |AWS_PASSWORD;
+      - name: Destroying the Infrastructure
+        run: |
+         
+          cd prometheus; terraform destroy -var-file=env-dev/main.tfvars -auto-approve
+        env: 
+          TF_VAR_aws_user: ${{env.AWS_USER}}
+          TF_VAR_aws_password: ${{env.AWS_PASSWORD}}
+          
+
+        

@@ -1,0 +1,3 @@
+# retreieve secrets in ansible from vault
+secrets: "{{ lookup('community.hashi_vault.hashi_vault', 'secret=tools/data/elasticsearch token={{ vault_token }} url=https://vault-public.manupanand.online:8200') }}"
+#validate_certs=false
