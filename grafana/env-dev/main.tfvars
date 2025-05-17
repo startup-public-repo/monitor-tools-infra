@@ -1,8 +1,9 @@
 env             ="dev"
-vpc_name        ="default_vpc_south2"
-subnet_name     ="default-ap-south-2c"
-ami_id          ="ami-0e86c549c4c958e98"
-zone_id         ="Z02556032JV56RSCGA16T"
+vpc_name        =""
+subnet_name     =""
+ami_id          =""
+zone_id         =""
+# fill details
 
 
 

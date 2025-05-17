@@ -35,7 +35,7 @@ This repository contains **Terraform** and **Ansible** configurations for settin
 ### Steps  
 1. Clone this repository:  
    ```bash
-   git clone https://github.com/your-org/monitoring-tools-infra.git
+   git clone https://github.com/startup-public-repo/monitor-tools-infra.git
    cd monitoring-tools-infra
    ```  
 2. Initialize Terraform:  
