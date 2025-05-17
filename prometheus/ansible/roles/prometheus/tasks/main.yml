@@ -1,0 +1,98 @@
+
+- name: Setting prompt name
+  ansible.builtin.lineinfile:
+     path: "/home/ec2-user/.bashrc"
+     line: 'export PS1="\[\e[1;31m\]\u\[\e[0m\]@\[\e[1;34m\]{{ role_name }}\[\e[0m\] \w \$ "'
+     create: true
+     mode: '0644'
+
+- name: Installing firewalld
+  ansible.builtin.dnf: 
+    name: firewalld 
+    state: latest
+  
+- name: Remove preinstalled Docker
+  ansible.builtin.shell: |
+     dnf remove docker \
+                docker-client \
+                docker-client-latest \
+                docker-common \
+                docker-latest \
+                docker-latest-logrotate \
+                docker-logrotate \
+                docker-engine \
+                podman \
+                runc
+  args:
+    executable: /bin/bash
+
+- name: Installing dnf-plugins-core
+  ansible.builtin.dnf:
+    name:  dnf-plugins-core
+    state: present
+
+- name: add repo docker
+  ansible.builtin.shell: |
+      dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker-ce.repo
+  args:
+    executable: /bin/bash
+
+- name:  install docker
+  ansible.builtin.dnf: 
+    name: 
+      -  docker-ce 
+      -  docker-ce-cli 
+      -  containerd.io 
+      -  docker-buildx-plugin 
+      -  docker-compose-plugin
+    state: present
+
+- name: Add ec2 user to docker group
+  ansible.builtin.user: 
+     name: ec2-user 
+     groups: docker 
+     append: yes
+
+- name: Enable Docker 
+  ansible.builtin.systemd_service: 
+   name:  docker
+   state: restarted
+   enabled: true
+- name: Enable  firewalld
+  ansible.builtin.systemd_service: 
+   name:  firewalld
+   state: restarted
+   enabled: true
+
+- name: Install Nginx
+  ansible.builtin.dnf:
+    name: nginx 
+    state: latest
+- name: Copy nginx conf 
+  ansible.builtin.template: 
+    src: nginx.conf
+    dest: /etc/nginx/nginx.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Enable  nginx
+  ansible.builtin.systemd_service: 
+   name:  nginx
+   state: restarted
+   enabled: true
+
+- name: Enabling ports with firewalld
+  ansible.builtin.shell: | 
+     firewall-cmd --zone=public --add-port=22/tcp --permanent  && firewall-cmd --reload
+     firewall-cmd --zone=public --add-port=9090/tcp --permanent  && firewall-cmd --reload
+     firewall-cmd --zone=public --add-port=80/tcp --permanent  && firewall-cmd --reload
+     firewall-cmd --zone=public --add-port=443/tcp --permanent  && firewall-cmd --reload
+  args:
+    executable: /bin/bash
+# run docker on local port 8081 nut use internal to connect rather than creating docker network
+- name: Install prometheus -repo
+  ansible.builtin.shell: |
+      docker run --name prometheus -d -p 9090:9090 prom/prometheus
+  args:
+    executable: /bin/bash
